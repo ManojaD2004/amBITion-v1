@@ -9,6 +9,9 @@ const databaseSchema = z.object({
       prjIds: z.string().array(),
     })
     .array(),
+  Socket_io_events: z
+    .object({ eventName: z.string(), sshPort: z.number() })
+    .array(),
 });
 
 module.exports = { databaseSchema };

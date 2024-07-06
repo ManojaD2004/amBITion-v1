@@ -10,8 +10,12 @@ RUN apt install openssh-server -y
 ARG username=admin
 ARG password=1234
 
-RUN useradd -m -s /bin/bash ${username}
+RUN apt-get -y install sudo
+
+RUN useradd -m -d /home/${username} -s /bin/bash ${username}
 RUN echo "${username}:${password}" | chpasswd
+RUN chown -R ${username}:${username} /src
+RUN chown -R ${username}:${username} /home/${username}
 
 EXPOSE 22
 
