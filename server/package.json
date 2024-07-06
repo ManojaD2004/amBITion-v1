@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Server Code Here!",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amBITion-24/dark_mode.git"
+  },
+  "author": "Manoja D",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amBITion-24/dark_mode/issues"
+  },
+  "homepage": "https://github.com/amBITion-24/dark_mode#readme"
+}
