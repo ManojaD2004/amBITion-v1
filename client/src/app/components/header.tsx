@@ -17,7 +17,7 @@ export default async function Header() {
       <ul className="flex gap-6 list-none font-medium">
         <Link href={'/create-instance'}>Instance</Link>
         <Link href={'/create-github-instance'}>Github</Link>
-        <li>Architecture</li>
+        <Link href={'/loadbalancer'}>Architecture</Link>
       </ul>
       </div>
         <div className='flex gap-6 list-none text-white items-center'>

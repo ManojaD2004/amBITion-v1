@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "../components/header";
-import Formcomponents from "./components/formcomponents";
 import { auth } from "../../../auth";
+import Formcomponents1 from "./components/formcomponents1";
 
 export default async function Page() {
   const session = await auth();
@@ -12,7 +12,7 @@ export default async function Page() {
         {/* Radial gradient for the container to give a faded look */}
         <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
         <div className="">
-          <Formcomponents user={session?.user} />
+          <Formcomponents1 user={session?.user} />
         </div>
       </div>
     </div>
