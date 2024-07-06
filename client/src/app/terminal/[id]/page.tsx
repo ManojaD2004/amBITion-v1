@@ -1,40 +1,53 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
-import { Terminal } from '@xterm/xterm';
-import '@xterm/xterm/css/xterm.css';
+import React, { useEffect, useRef, useState } from "react";
+import { Terminal } from "@xterm/xterm";
+import ip from "@/app/globalvariables";
+import "@xterm/xterm/css/xterm.css";
+import { io } from "socket.io-client";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { FitAddon } from "@xterm/addon-fit";
 
 const Xterm = () => {
-  const terminalRef = useRef<HTMLDivElement | null>(null);
+    const terminalRef = useRef<any | null>(null);
+    const termDiv = useRef<any>(null);
+    const socketRef = useRef<any | null>(null);
+    // const [socket, setSocket] = useState<any>(undefined);
+  
+    useEffect(() => {
+        const term = new Terminal();
+        terminalRef.current = term;
+        if (terminalRef.current != null) {
+  
+          terminalRef.current.open(termDiv.current);
+          // term.write("Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ");
+    
+          terminalRef.current.onKey(({ key, domEvent }:any) => {
+            if (socketRef.current!=null){
+            socketRef.current.emit("data", key); }// Send the key to the server
+          });
+        }
+        return () => {
+          term.dispose();
+        };
+      }, []);
 
-  useEffect(() => {
-    const term = new Terminal();
-    if (terminalRef.current) {
-      term.open(terminalRef.current);
-      term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
-
-      term.onKey(({ key, domEvent }) => {
-        const printable = !domEvent.altKey && !domEvent.ctrlKey && !domEvent.metaKey;
-
-        if (domEvent.keyCode === 13) {
-          // Enter key
-          term.write('\r\n$ ');
-        } else if (domEvent.keyCode === 8) {
-          // Backspace key
-          if (term.buffer.active.cursorX > 2) {
-            term.write('\b \b');
-          }
-        } else if (printable) {
-          term.write(key);
+    useEffect(() => {
+      const socket = io(ip);
+      socketRef.current = socket;
+      socketRef.current.on("data", (message: any) => {
+        if (terminalRef.current != null) {
+          terminalRef.current.write(message);
         }
       });
-    }
-
-    return () => {
-      term.dispose();
-    };
-  }, []);
-
-  return <div ref={terminalRef} style={{ width: '100%', height: '100%' }}></div>;
-};
-
-export default Xterm;
+  
+    //   setSocket(socket);
+    }, []);
+  
+   
+  
+    return (
+      <div ref={termDiv} style={{ width: "100%", height: "100%" }}></div>
+    );
+  };
+  
+  export default Xterm;
