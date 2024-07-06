@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
 const { databaseSchema } = require("./schema");
-const { createDockerByUserId, deleteDockerByContId } = require("./docker");
+const { createDockerByUserId, deleteDockerByContId, createDockerCiCdVersion } = require("./docker");
 const socketIO = require("socket.io");
 
 const fs = require("fs");
@@ -68,6 +68,68 @@ app.post("/create/:userid/dockerinstance", (req, res) => {
     database.Socket_io_events.push({
       eventName: req.params.userid + "_" + req.body.projectId,
       sshPort: database.Docker_PORT + 2,
+      contId: stdout.trim(),
+      defaultCont: true,
+    });
+    // incrementing port value for next container
+    database.Docker_PORT += 10;
+
+    // writing db json
+    fs.writeFileSync("./db/database.json", JSON.stringify(database), {
+      encoding: "utf8",
+    });
+    console.log("Docker Instance Created!");
+    res.status(201);
+    res.send({ created: true, dockerContId: stdout.trim() });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    console.log("Some Error Has Occured!");
+    console.log(error);
+    res.send({ created: false, dockerContId: null });
+  }
+});
+
+app.post("/create/:userid/cicdinstance", (req, res) => {
+  try {
+    console.log(req.body);
+    console.log(req.params.userid);
+
+    // reading database json
+    const databaseString = fs.readFileSync("./db/database.json", {
+      encoding: "utf-8",
+    });
+    const database = databaseSchema.parse(JSON.parse(databaseString));
+
+    // creating docker instance
+    const stdout = createDockerCiCdVersion(
+      req.params.userid,
+      req.body.projectId,
+      database.Docker_PORT + 1,
+      req.body.githubLink,
+    );
+
+    // editing db json
+    const findUser = database.Docker_Users.find(
+      (ele) => ele.username == req.params.userid
+    );
+    if (findUser == undefined) {
+      database.Docker_Users.push({
+        username: req.params.userid,
+        contIds: [stdout.trim()],
+        prjIds: [req.body.projectId.trim()],
+      });
+    } else {
+      findUser.contIds.push(stdout.trim());
+      findUser.prjIds.push(req.body.projectId);
+    }
+
+    // adding socket io event name with ports
+    database.Socket_io_events.push({
+      eventName: req.params.userid + "_" + req.body.projectId,
+      sshPort: database.Docker_PORT + 2,
+      contId: stdout.trim(),
+      defaultCont: false,
     });
     // incrementing port value for next container
     database.Docker_PORT += 10;
@@ -169,6 +231,8 @@ app.get("/getinstances/:userid", (req, res) => {
         resEvents.push({
           prjId: eventNames[i].eventName,
           avaPorts: [eventNames[i].sshPort - 1, eventNames[i].sshPort],
+          contId: eventNames[i].contId,
+          defaultCont: eventNames[i].defaultCont,
         });
       }
     }

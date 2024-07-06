@@ -10,7 +10,12 @@ const databaseSchema = z.object({
     })
     .array(),
   Socket_io_events: z
-    .object({ eventName: z.string(), sshPort: z.number() })
+    .object({
+      eventName: z.string(),
+      sshPort: z.number(),
+      contId: z.string(),
+      defaultCont: z.boolean(),
+    })
     .array(),
 });
 

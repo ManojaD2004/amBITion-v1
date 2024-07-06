@@ -28,4 +28,21 @@ function deleteDockerByContId(contid) {
   return stdout2;
 }
 
-module.exports = { createDockerByUserId, deleteDockerByContId };
+function createDockerCiCdVersion(
+  userid,
+  prjid,
+  webport,
+  githubLink,
+  metrics = { memory: "512M", storage: "4G", cpus: ".5" }
+) {
+  const stdout = execSync(
+    `docker run -it -d -p ${webport}:3000 --storage-opt size=${metrics.storage} -m ${metrics.memory} --cpus="${metrics.cpus}" --name ci-cd-server-v1-${userid}-${prjid} test-ci-cd-v1 ${githubLink}`,
+    {
+      encoding: "utf-8",
+    }
+  );
+  console.log(stdout);
+  return stdout;
+}
+
+module.exports = { createDockerByUserId, deleteDockerByContId, createDockerCiCdVersion };
