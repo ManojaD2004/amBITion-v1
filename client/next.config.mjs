@@ -1,7 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images:{
-        domains:['ui.aceternity.com'],
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'ui.aceternity.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'img.icons8.com',
+                port: '',
+                pathname: '/**',
+            },
+        ],
     },
 };
 

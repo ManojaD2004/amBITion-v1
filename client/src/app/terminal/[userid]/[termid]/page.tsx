@@ -14,8 +14,20 @@ const Xterm = () => {
     // const [socket, setSocket] = useState<any>(undefined);
   
     useEffect(() => {
-        const term = new Terminal();
+        const term = new Terminal({
+            theme: {
+              background: "#00000",
+              foreground: "white",
+              cursor: "white",
+    
+            },
+          });
+        term.loadAddon(new WebLinksAddon());
+
+      const fitAddon = new FitAddon();
+      term.loadAddon(fitAddon);
         terminalRef.current = term;
+        fitAddon.fit();
         if (terminalRef.current != null) {
   
           terminalRef.current.open(termDiv.current);
@@ -32,7 +44,7 @@ const Xterm = () => {
       }, []);
 
     useEffect(() => {
-      const socket = io(ip);
+      const socket = io(ip ,{/*+ "/"*/});
       socketRef.current = socket;
       socketRef.current.on("data", (message: any) => {
         if (terminalRef.current != null) {

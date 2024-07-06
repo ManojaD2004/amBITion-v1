@@ -1,6 +1,7 @@
+"use client"
 import React from 'react'
 import { cn } from "@/app/utils/cn";
-import { Spotlight } from "./ui/Spotlight";
+import { LampContainer } from "./ui/lamp";
 import {
   TextRevealCard,
   TextRevealCardDescription,
@@ -8,27 +9,28 @@ import {
 } from "./ui/text-reveal-card";
 import { WobbleCard } from './ui/wobble-card';
 import Image from 'next/image';
+import { motion } from "framer-motion";
+import Link from 'next/link';
 
 
 const Body = () => {
   return (
-    <div>
+    <div className='pt-[50px]'>
     <div className='flex'>
-        <div className="h-[40rem] w-full rounded-md flex md:items-center md:justify-center bg-black/[0.96] antialiased bg-grid-white/[0.02] relative overflow-hidden">
-      <Spotlight
-        className="-top-40 left-0 md:left-60 md:-top-20"
-        fill="white"
-      />
-      <div className=" p-4 max-w-7xl  mx-auto relative z-10  w-full pt-20 md:pt-0">
-        <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
-          Dolphine
-        </h1>
-        <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center mx-auto">
-        DevOps As A Tool. We want to centralize the DevOps tools and Framework, into a single centralized tool.
-        Multiple independent steps of DevOps merge into one single one.
-        </p>
-      </div>
-    </div>
+    <LampContainer>
+      <motion.h1
+        initial={{ opacity: 0.5, y: 100 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.3,
+          duration: 0.8,
+          ease: "easeInOut",
+        }}
+        className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl  tracking-tight text-transparent md:text-7xl font-medium"
+      >
+        Dolphine 
+      </motion.h1>
+    </LampContainer>
     <div className="flex items-center justify-center  h-[40rem] rounded-2xl w-full">
       <TextRevealCard
         text="You know the business"
@@ -47,6 +49,9 @@ const Body = () => {
    
   
     </div>
+    <div className='flex items-center my-[40px] w-full justify-center'>
+   <Link href={'/terminal/123/12'} target='_blank' className=''><div className='text-white bg-blue-400  w-[200px] h-[4px] rounded-md font-medium text-center leading-10'>Create Instance</div></Link>
+   </div>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto w-full">
       <WobbleCard
         containerClassName="col-span-1 lg:col-span-2 h-full bg-pink-800 min-h-[500px] lg:min-h-[300px]"
@@ -97,6 +102,8 @@ const Body = () => {
         />
       </WobbleCard>
     </div>
+
+   
     </div>
   )
 }
