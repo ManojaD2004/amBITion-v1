@@ -166,7 +166,10 @@ app.get("/getinstances/:userid", (req, res) => {
     const resEvents = [];
     for (let i = 0; i < eventNames.length; i++) {
       if (eventNames[i].eventName.includes(req.params.userid)) {
-        resEvents.push(eventNames[i]);
+        resEvents.push({
+          prjId: eventNames[i].eventName,
+          avaPorts: [eventNames[i].sshPort - 1, eventNames[i].sshPort],
+        });
       }
     }
     res.status(200);
@@ -243,6 +246,54 @@ function initSocketIO() {
       });
   });
 }
+
+io.on("connection", function (socket) {
+  console.log("Connection Done!");
+  // const eventId = socket.handshake.query.terminalID;
+  // let portNumberSSH = eventNames.map((ele) => ele.eventName).indexOf(eventId);
+  // if (portNumberSSH == -1) {
+  //   return socket.emit("data", "\r\n*** Container Does not Exists: ***\r\n");
+  // }
+  let conn = new SSHClient();
+  conn
+    .on("ready", function () {
+      socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
+      conn.shell(function (err, stream) {
+        if (err) {
+          return socket.emit(
+            "data",
+            "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n"
+          );
+        }
+        socket.on("data", function (data) {
+          stream.write(data);
+        });
+        stream
+          .on("data", function (d) {
+            socket.emit("data", d.toString("binary"));
+            // console.log(d.toString("binary"));
+          })
+          .on("close", function () {
+            conn.end();
+          });
+      });
+    })
+    .on("close", function () {
+      socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
+    })
+    .on("error", function (err) {
+      socket.emit(
+        "data",
+        "\r\n*** SSH CONNECTION ERROR: " + err.message + " ***\r\n"
+      );
+    })
+    .connect({
+      host: "10.10.10.154",
+      username: "admin",
+      password: "1234",
+      port: 2002,
+    });
+});
 
 server.listen(PORT, () => {
   console.log(`Listening to Port ${PORT}`);

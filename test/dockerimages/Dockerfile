@@ -11,6 +11,10 @@ ARG username=admin
 ARG password=1234
 
 RUN apt-get -y install sudo
+RUN apt-get -y install curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_22.x  | bash -
+RUN apt-get -y install nodejs
+
 
 RUN useradd -m -d /home/${username} -s /bin/bash ${username}
 RUN echo "${username}:${password}" | chpasswd
