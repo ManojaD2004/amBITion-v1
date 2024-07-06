@@ -17,6 +17,11 @@ const databaseSchema = z.object({
       defaultCont: z.boolean(),
     })
     .array(),
+  LoadBalancing: z.object({
+    eventName: z.string(),
+    webPort: z.string(),
+    contIds: z.string().array(),
+  }).array(),
 });
 
 module.exports = { databaseSchema };

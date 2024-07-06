@@ -6,6 +6,8 @@ const {
   createDockerByUserId,
   deleteDockerByContId,
   createDockerCiCdVersion,
+  createDockerLoadBalancer,
+  deleteDockerLoadBalancer,
 } = require("./docker");
 const socketIO = require("socket.io");
 
@@ -154,9 +156,129 @@ app.post("/create/:userid/cicdinstance", (req, res) => {
   }
 });
 
+app.post("/create/:userid/loadbalancer", (req, res) => {
+  try {
+    console.log(req.body);
+    console.log(req.params.userid);
+
+    // reading database json
+    const databaseString = fs.readFileSync("./db/database.json", {
+      encoding: "utf-8",
+    });
+    const database = databaseSchema.parse(JSON.parse(databaseString));
+
+    // creating docker instance
+    const stdout = createDockerLoadBalancer(
+      req.params.userid,
+      req.body.projectId,
+      database.Docker_PORT + 1,
+      req.body.githubLink1,
+      req.body.githubLink2
+    );
+
+    // editing db json
+    const findUser = database.LoadBalancing.find(
+      (ele) => ele.eventName == `${req.params.userid}-${req.body.projectId}`
+    );
+    if (findUser == undefined) {
+      database.LoadBalancing.push({
+        eventName: `${req.params.userid}-${req.body.projectId}`,
+        contIds: stdout,
+        webPort: database.Docker_PORT + 1,
+      });
+    } else {
+      console.log("You already have an Load Balancing.");
+      res.status(300);
+      return res.send({
+        created: false,
+        dockerContId: null,
+        message: "You already have a Load Balancer!",
+      });
+    }
+
+    // incrementing port value for next container
+    database.Docker_PORT += 10;
+
+    // writing db json
+    fs.writeFileSync("./db/database.json", JSON.stringify(database), {
+      encoding: "utf8",
+    });
+    console.log("Docker Load Balancer Created!");
+    res.status(201);
+    res.send({ created: true, dockerContId: stdout });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    console.log("Some Error Has Occured!");
+    console.log(error);
+    res.send({ created: false, dockerContId: null });
+  }
+});
+
+app.post("/delete/:userid/:loadbalancerid", (req, res) => {
+  try {
+    console.log(req.body);
+    console.log(req.params.userid);
+
+    // reading database json
+    const databaseString = fs.readFileSync("./db/database.json", {
+      encoding: "utf-8",
+    });
+    const database = databaseSchema.parse(JSON.parse(databaseString));
+
+    // finding the loadbalancer id json
+    const findUser = database.LoadBalancing.find(
+      (ele) => ele.eventName == `${req.params.userid}-${req.body.projectId}`
+    );
+    if (findUser == undefined) {
+      console.log("You dont have an Load Balancing, to Delete!");
+      res.status(400);
+      return res.send({
+        deleted: false,
+        dockerContId: null ,
+        message: "You dont have an Load Balancing, to Delete!",
+      });
+    }
+
+    // deleteing docker instance
+    const stdout = deleteDockerLoadBalancer(
+      req.params.userid,
+      req.body.projectId,
+      findUser.contIds
+    );
+    const index = database.LoadBalancing.map((ele) => ele.eventName).indexOf(
+      `${req.params.userid}-${req.body.projectId}`
+    );
+    database.LoadBalancing.splice(index, 1);
+
+    // writing db json
+    fs.writeFileSync("./db/database.json", JSON.stringify(database), {
+      encoding: "utf8",
+    });
+    console.log("Docker Load Balancer Deleted!");
+    res.status(200);
+    res.send({
+      deleted: true,
+      dockerContId: stdout,
+      message: "You have Deleted an Load Balancing!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    console.log("Some Error Has Occured!");
+    console.log(error);
+    res.send({
+      deleted: false,
+      dockerContId: null,
+      message: "Some Error Has Occured!",
+    });
+  }
+});
+
 app.post("/delete/:userid/:contid", (req, res) => {
   try {
     // reading db
+    console.log(req.body);
     console.log(
       `User ${req.params.userid} request for deleting container ${req.params.contid}`
     );
