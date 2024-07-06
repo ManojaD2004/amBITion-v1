@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+
+
 const svgToDataUri = require("mini-svg-data-uri");
  
 const colors = require("tailwindcss/colors");
@@ -22,6 +24,10 @@ const config: Config = {
       animation: {
         spotlight: "spotlight 2s ease .75s 1 forwards",
       },
+      boxShadow: {
+        input: `0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08)`,
+      },
+
       keyframes: {
         spotlight: {
           "0%": {
@@ -61,7 +67,19 @@ const config: Config = {
           { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
         );
       },
+      addVariablesForColors
     
   ],
 };
+
 export default config;
+function addVariablesForColors({ addBase, theme }: any) {
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+ 
+  addBase({
+    ":root": newVars,
+  });
+}

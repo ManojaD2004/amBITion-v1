@@ -7,7 +7,8 @@ import { io } from "socket.io-client";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { FitAddon } from "@xterm/addon-fit";
 
-const Xterm = () => {
+const Xterm = ({params}:any) => {
+    const id=params.termid;
     const terminalRef = useRef<any | null>(null);
     const termDiv = useRef<any>(null);
     const socketRef = useRef<any | null>(null);
@@ -35,7 +36,7 @@ const Xterm = () => {
     
           terminalRef.current.onKey(({ key, domEvent }:any) => {
             if (socketRef.current!=null){
-            socketRef.current.emit("data", key); }// Send the key to the server
+            socketRef.current.emit(`data-${id}`, key); }// Send the key to the server
           });
         }
         return () => {
@@ -44,9 +45,9 @@ const Xterm = () => {
       }, []);
 
     useEffect(() => {
-      const socket = io(ip ,{/*+ "/"*/});
+      const socket = io(`${ip}?termID=${id}` ,{/*+ "/"*/});
       socketRef.current = socket;
-      socketRef.current.on("data", (message: any) => {
+      socketRef.current.on(`data-${id}`, (message: any) => {
         if (terminalRef.current != null) {
           terminalRef.current.write(message);
         }
