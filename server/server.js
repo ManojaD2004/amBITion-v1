@@ -2,7 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
 const { databaseSchema } = require("./schema");
-const { createDockerByUserId, deleteDockerByContId, createDockerCiCdVersion } = require("./docker");
+const {
+  createDockerByUserId,
+  deleteDockerByContId,
+  createDockerCiCdVersion,
+} = require("./docker");
 const socketIO = require("socket.io");
 
 const fs = require("fs");
@@ -106,7 +110,7 @@ app.post("/create/:userid/cicdinstance", (req, res) => {
       req.params.userid,
       req.body.projectId,
       database.Docker_PORT + 1,
-      req.body.githubLink,
+      req.body.githubLink
     );
 
     // editing db json
@@ -153,6 +157,9 @@ app.post("/create/:userid/cicdinstance", (req, res) => {
 app.post("/delete/:userid/:contid", (req, res) => {
   try {
     // reading db
+    console.log(
+      `User ${req.params.userid} request for deleting container ${req.params.contid}`
+    );
     const databaseString = fs.readFileSync("./db/database.json", {
       encoding: "utf-8",
     });
@@ -190,7 +197,7 @@ app.post("/delete/:userid/:contid", (req, res) => {
 
     // delete event name of socket io
     let index = database.Socket_io_events.map((ele) => ele.eventName).indexOf(
-      req.params.userid + "_" + req.body.projectId
+      req.body.projectId
     );
     database.Socket_io_events.splice(index, 1);
 
@@ -254,87 +261,45 @@ app.get("/getinstances/:userid", (req, res) => {
   }
 });
 
-function initSocketIO() {
+io.on("connection", function (socket) {
+  console.log("Connection Done!");
   // reading db
   const databaseString = fs.readFileSync("./db/database.json", {
     encoding: "utf-8",
   });
   const database = databaseSchema.parse(JSON.parse(databaseString));
   const eventNames = database.Socket_io_events;
-  let n = database.Socket_io_events.length;
-  io.on("connection", function (socket) {
-    console.log("Connection Done!");
-    const eventId = socket.handshake.query.terminalID;
-    let portNumberSSH = eventNames.map((ele) => ele.eventName).indexOf(eventId);
-    if (portNumberSSH == -1) {
-      return socket.emit("data", "\r\n*** Container Does not Exists: ***\r\n");
-    }
-    let conn = new SSHClient();
-    conn
-      .on("ready", function () {
-        socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
-        conn.shell(function (err, stream) {
-          if (err) {
-            return socket.emit(
-              "data",
-              "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n"
-            );
-          }
-          socket.on("data", function (data) {
-            stream.write(data);
-          });
-          stream
-            .on("data", function (d) {
-              socket.emit("data", d.toString("binary"));
-              // console.log(d.toString("binary"));
-            })
-            .on("close", function () {
-              conn.end();
-            });
-        });
-      })
-      .on("close", function () {
-        socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
-      })
-      .on("error", function (err) {
-        socket.emit(
-          "data",
-          "\r\n*** SSH CONNECTION ERROR: " + err.message + " ***\r\n"
-        );
-      })
-      .connect({
-        host: "10.10.10.154",
-        username: "admin",
-        password: "1234",
-        port: eventNames[portNumberSSH].sshPort,
-      });
-  });
-}
 
-io.on("connection", function (socket) {
-  console.log("Connection Done!");
-  // const eventId = socket.handshake.query.terminalID;
-  // let portNumberSSH = eventNames.map((ele) => ele.eventName).indexOf(eventId);
-  // if (portNumberSSH == -1) {
-  //   return socket.emit("data", "\r\n*** Container Does not Exists: ***\r\n");
-  // }
+  // getting event id
+  const eventId = socket.handshake.query.termID;
+  console.log(eventId);
+  let portNumberSSH = eventNames.map((ele) => ele.eventName).indexOf(eventId);
+  if (portNumberSSH == -1) {
+    return socket.emit(
+      `data-${eventId}`,
+      "\r\n*** Container Does not Exists: ***\r\n"
+    );
+  }
   let conn = new SSHClient();
   conn
     .on("ready", function () {
-      socket.emit("data", "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n");
+      socket.emit(
+        `data-${eventId}`,
+        "\r\n*** SSH CONNECTION ESTABLISHED ***\r\n"
+      );
       conn.shell(function (err, stream) {
         if (err) {
           return socket.emit(
-            "data",
+            `data-${eventId}`,
             "\r\n*** SSH SHELL ERROR: " + err.message + " ***\r\n"
           );
         }
-        socket.on("data", function (data) {
+        socket.on(`data-${eventId}`, function (data) {
           stream.write(data);
         });
         stream
           .on("data", function (d) {
-            socket.emit("data", d.toString("binary"));
+            socket.emit(`data-${eventId}`, d.toString("binary"));
             // console.log(d.toString("binary"));
           })
           .on("close", function () {
@@ -343,11 +308,11 @@ io.on("connection", function (socket) {
       });
     })
     .on("close", function () {
-      socket.emit("data", "\r\n*** SSH CONNECTION CLOSED ***\r\n");
+      socket.emit(`data-${eventId}`, "\r\n*** SSH CONNECTION CLOSED ***\r\n");
     })
     .on("error", function (err) {
       socket.emit(
-        "data",
+        `data-${eventId}`,
         "\r\n*** SSH CONNECTION ERROR: " + err.message + " ***\r\n"
       );
     })
