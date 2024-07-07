@@ -80,7 +80,7 @@ const Instances = ({ user }: any) => {
                   <Link
                     href={`/terminal/${user.name}/${ele.prjId}`}
                     target="_blank"
-                    className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
+                    className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm mr-[10px]"
                   >
                     connect
                   </Link>
@@ -89,7 +89,7 @@ const Instances = ({ user }: any) => {
                     target="_blank"
                     className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
                   >
-                    matrix
+                    metrics
                   </Link>
                   </div>
                  
