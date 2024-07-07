@@ -8,6 +8,7 @@ const {
   createDockerCiCdVersion,
   createDockerLoadBalancer,
   deleteDockerLoadBalancer,
+  getDockerLogByContId,
 } = require("./docker");
 const socketIO = require("socket.io");
 
@@ -419,6 +420,26 @@ app.get("/getloadbalancers/:userid", (req, res) => {
     });
   }
 });
+
+app.get("/metrics/:contid", (req,res) => {
+  try {
+    const stdout = getDockerLogByContId(req.params.contid);
+    res.status(200);
+     res.send({
+       gotten: true,
+       logEvents: JSON.parse(stdout.toString()),
+       message: "Successfully Send the Logs!",
+     });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    res.send({
+      gotten: false,
+      logEvents: null,
+      message: "Some Error Occured!!",
+    });
+  }
+})
 
 io.on("connection", function (socket) {
   console.log("Connection Done!");

@@ -28,12 +28,7 @@ function deleteDockerByContId(contid) {
   return stdout2;
 }
 
-function createDockerCiCdVersion(
-  userid,
-  prjid,
-  webport,
-  githubLink,
-) {
+function createDockerCiCdVersion(userid, prjid, webport, githubLink) {
   const stdout = execSync(
     `docker run -it -d -p ${webport}:3000 --name ci-cd-server-v1-${userid}-${prjid} test-ci-cd-v1 ${githubLink}`,
     {
@@ -97,10 +92,17 @@ function deleteDockerLoadBalancer(userid, prjid, contIds) {
   return stdoutPre;
 }
 
+function getDockerLogByContId(contId) {
+  const stdout = execSync(`docker stats --no-stream --format='json' ${contId}`);
+  console.log(stdout);
+  return stdout;
+}
+
 module.exports = {
   createDockerByUserId,
   deleteDockerByContId,
   createDockerCiCdVersion,
   createDockerLoadBalancer,
   deleteDockerLoadBalancer,
+  getDockerLogByContId
 };
