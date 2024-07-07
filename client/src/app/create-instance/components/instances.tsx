@@ -76,6 +76,7 @@ const Instances = ({ user }: any) => {
               </div>
               <div className="flex items-center justify-center">
                 {ele.defaultCont === true && (
+                  <div>
                   <Link
                     href={`/terminal/${user.name}/${ele.prjId}`}
                     target="_blank"
@@ -83,6 +84,15 @@ const Instances = ({ user }: any) => {
                   >
                     connect
                   </Link>
+                  <Link
+                    href={`/metrics/${ele.contId}`}
+                    target="_blank"
+                    className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
+                  >
+                    matrix
+                  </Link>
+                  </div>
+                 
                 )}
               </div>
               <div className="flex items-center justify-center">

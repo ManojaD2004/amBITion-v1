@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
 
 const Page = () => {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
+    let timeoutId:any;
+
     async function getData() {
       const response = await fetch(`${ip}/getinstances/${user.name}`, {
         headers: {
@@ -16,34 +18,37 @@ const Page = () => {
       console.log(result);
 
       setValue(result);
+
+      
+      timeoutId = setTimeout(getData, 5000);
     }
+
     getData();
+
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
-
   return (
-    <div className="text-white pt-[30px] ">
-      
+    <div className="text-white pt-[30px]">
       <div className="p-[40px]">
         <p className="text-[160px] font-bold text-purple-500">905 MB</p>
-        <p className="text-[50px] ">CPU utilization</p>
-      
+        <p className="text-[50px]">CPU utilization</p>
       </div>
       <div className="flex mt-[50px] items-center justify-center gap-[500px]">
-        
-          <div className="text-[30px]">Ram:
-            <ReactSpeedometer
-              maxValue={500}
-              value={value}
-              needleColor="red"
-              startColor="green"
-              segments={10}
-              endColor="blue"
-            />
-            
-          </div>
-            <div className="text-[30px]">
-            Storage:
+        <div className="text-[30px]">
+          Ram:
+          <ReactSpeedometer
+            maxValue={500}
+            value={value}
+            needleColor="red"
+            startColor="green"
+            segments={10}
+            endColor="blue"
+          />
+        </div>
+        <div className="text-[30px]">
+          Storage:
           <ReactSpeedometer
             maxValue={500}
             value={value}
@@ -59,3 +64,4 @@ const Page = () => {
 };
 
 export default Page;
+
