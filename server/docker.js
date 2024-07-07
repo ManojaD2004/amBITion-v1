@@ -93,7 +93,7 @@ function deleteDockerLoadBalancer(userid, prjid, contIds) {
 }
 
 function getDockerLogByContId(contId) {
-  const stdout = execSync(`docker stats --no-stream --format='json' ${contId}`);
+  const stdout = execSync(`docker stats --no-stream --format='json' ${contId}`).toString();
   console.log(stdout);
   return stdout;
 }
