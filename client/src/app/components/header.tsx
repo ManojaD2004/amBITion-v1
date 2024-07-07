@@ -22,7 +22,7 @@ export default async function Header() {
       </div>
         <div className='flex gap-6 list-none text-white items-center'>
           
-       {session?(<div className='font-semibold'><img src={`${session?.user?.image}`} width={30} className='inline-block rounded-[50%]' /> {session?.user?.name} <SignOut/></div>):(<div><SignIn/></div>)}
+       {session?(<div className='font-medium'><img src={`${session?.user?.image}`} width={30} className='inline-block rounded-[50%]' /> {session?.user?.name} <SignOut/></div>):(<div><SignIn/></div>)}
         </div>
     </div>
   )

@@ -6,6 +6,8 @@ import "@xterm/xterm/css/xterm.css";
 import { io } from "socket.io-client";
 import { WebLinksAddon } from "@xterm/addon-web-links";
 import { FitAddon } from "@xterm/addon-fit";
+import Header from "@/app/components/header";
+
 
 const Xterm = ({params}:any) => {
     const id=params.termid;
@@ -29,6 +31,9 @@ const Xterm = ({params}:any) => {
       term.loadAddon(fitAddon);
         terminalRef.current = term;
         fitAddon.fit();
+        
+       
+
         if (terminalRef.current != null) {
   
           terminalRef.current.open(termDiv.current);
@@ -38,9 +43,44 @@ const Xterm = ({params}:any) => {
             if (socketRef.current!=null){
             socketRef.current.emit(`data-${id}`, key); }// Send the key to the server
           });
+          terminalRef.current.attachCustomKeyEventHandler((arg:any) => {
+            if (arg.ctrlKey && arg.code === "KeyV" && arg.type === "keydown") {
+                navigator.clipboard.readText()
+                  .then(text => {
+                    socketRef.current.emit(`data-${id}`, text); 
+                  })
+            }
+            return true;
+        });
+          // termDiv.current.addEventListener('contextmenu', () => {
+          //   if (term.hasSelection()) {
+          //     socketRef.current.emit(`data-${id}`, key); 
+          //     terminalRef.current.select(0, 0, 0);
+          //   } else {
+          //     // ipcRenderer.send('terminal-data', clipboard.readText())
+          //     socketRef.current.emit(`data-${id}`, key); 
+          //   }
+          // })
+          // terminalRef.current.attachCustomKeyEventHandler((event:any) => {
+          //   event.preventDefault();
+          //   console.log("How Much");
+          //   if (event.ctrlKey === true && event.key === 'v') {
+          //     let i = 1;
+          //     navigator.clipboard.readText().then(text => {
+          //       if (i == 1) {
+          //         console.log(text);
+          //         console.log(event.ctrlKey);
+          //         i = i + 1;
+          //         socketRef.current.emit(`data-${id}`, text);
+          //       }
+          //     });
+          //     return false; // Prevent the default action
+          //   }
+          //   return true;
+          // });
         }
         return () => {
-          term.dispose();
+          terminalRef.current.dispose();
         };
       }, []);
 
@@ -59,7 +99,10 @@ const Xterm = ({params}:any) => {
    
   
     return (
+      <div>
+        
       <div ref={termDiv} style={{ width: "100%", height: "100%" }}></div>
+      </div>
     );
   };
   

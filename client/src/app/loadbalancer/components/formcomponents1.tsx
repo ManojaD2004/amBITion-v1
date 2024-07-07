@@ -66,6 +66,7 @@ const Formcomponents1 = ({user}: any) => {
       console.log("Posted data:", result);
       if (result.created == true) {
         toast.success("Load balancer created")
+        window.location.reload();
       }
 
     } catch (error) {
@@ -153,7 +154,7 @@ const Formcomponents1 = ({user}: any) => {
                     target="_blank"
                     className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
                   >
-                    visit site
+                    Visit Site
                   </a>
                 </div>
                 <div className="flex items-center justify-center">
@@ -170,6 +171,7 @@ const Formcomponents1 = ({user}: any) => {
                               }
                             );
                       }
+                      window.location.reload();
                       deleteCont();
                   }} className="bg-[#e12129] rounded-md text-white px-[20px] py-[10px] text-sm">
                     delete

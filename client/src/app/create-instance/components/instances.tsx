@@ -4,7 +4,7 @@ import Cards from "./Card";
 import { cn } from "@/app/utils/cn";
 import Link from "next/link";
 import ip from "@/app/globalvariables";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 
 interface event {
   prjId: string;
@@ -52,7 +52,21 @@ const Instances = ({ user }: any) => {
               </div>
               <div>
                 <CardTitle>Ports available</CardTitle>
-                <CardDescription>{ele.avaPorts}</CardDescription>
+                <CardDescription>
+                  <a
+                    target="_blank"
+                    href={`${ip.replace(":5000", "")}:${ele.avaPorts[0]}`}
+                  >
+                    {ele.avaPorts[0]}
+                  </a>
+                  {
+                    ele.avaPorts.length === 2 &&
+                  <a
+                  >
+                   {", "}{ele.avaPorts[1]}
+                  </a>
+                  }
+                </CardDescription>
               </div>
               <div>
                 <CardTitle>Status</CardTitle>
@@ -64,18 +78,18 @@ const Instances = ({ user }: any) => {
                 {ele.defaultCont === true && (
                   <Link
                     href={`/terminal/${user.name}/${ele.prjId}`}
+                    target="_blank"
                     className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
                   >
                     connect
                   </Link>
                 )}
-                
               </div>
               <div className="flex items-center justify-center">
                 <button
                   onClick={() => {
                     async function deleteCont() {
-                      const response = await fetch(
+                      const res: any = await fetch(
                         `${ip}/delete/${user.name}/${ele.contId}`,
                         {
                           method: "POST",
@@ -85,8 +99,16 @@ const Instances = ({ user }: any) => {
                           body: JSON.stringify({ projectId: ele.prjId }),
                         }
                       );
+                      const isDel = await res.json();
+                      console.log(isDel);
+                      if (isDel.deleted === true) {
+                        toast.success("deleted successfully");
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 2000);
+                      }
                     }
-                    toast.success("deleted successfully")
+
                     deleteCont();
                   }}
                   className="bg-[#e12129] rounded-md text-white px-[20px] py-[10px] text-sm"
