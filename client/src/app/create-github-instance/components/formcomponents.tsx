@@ -5,14 +5,15 @@ import Link from "next/link";
 import { Label } from "../../create-instance/components/label";
 import { Input } from "../../create-instance/components/input";
 import ip from "@/app/globalvariables";
+import {toast} from "react-hot-toast";
 
 interface Data {
-  link: string;
+  githubLink: string;
 
   projectId: string;
 }
 
-const Formcomponents = (username: any) => {
+const Formcomponents = ({user}:{user:any}) => {
   const [link, setLink] = useState("");
   const [projectId, setProjectid] = useState("");
 
@@ -20,10 +21,10 @@ const Formcomponents = (username: any) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const newUser: Data = { link, projectId };
+    const newUser: Data = { githubLink: link, projectId };
 
     try {
-      const response = await fetch(`${ip}/create/${username}/dockerinstance`, {
+      const response = await fetch(`${ip}/create/${user?.name}/cicdinstance`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,6 +39,7 @@ const Formcomponents = (username: any) => {
       const result = await response.json();
       console.log("Posted data:", result);
       if (result.created == true) {
+        toast.success('New github instance created');
       }
     } catch (error) {
       console.error("Error posting data:", error);
@@ -66,9 +68,9 @@ const Formcomponents = (username: any) => {
         </LabelInputContainer>
 
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="projectId">Github link</Label>
+          <Label htmlFor="link">Github link</Label>
           <Input
-            id="projectId"
+            id="link"
             placeholder="https://github.com/ManojaD2004/amBITion-v1.git"
             type="text"
             onChange={(e) => setLink(e.target.value)}

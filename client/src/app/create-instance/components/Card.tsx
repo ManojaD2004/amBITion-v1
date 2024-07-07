@@ -3,6 +3,7 @@ import { cn } from "@/app/utils/cn";
 import Link from "next/link";
 import { Label } from "./label";
 import { Input } from "./input";
+import { toast } from 'react-hot-toast';
 import ip from "@/app/globalvariables"; 
 
 interface Data{
@@ -41,7 +42,8 @@ const Cards = ({username}:{username:string}) => {
       const result = await response.json();
       console.log('Posted data:', result);
       if (result.created == true) {
-        
+        toast.success('new instance created succesfully');
+        window.location.reload();
       }
 
      

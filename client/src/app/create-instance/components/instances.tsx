@@ -4,18 +4,19 @@ import Cards from "./Card";
 import { cn } from "@/app/utils/cn";
 import Link from "next/link";
 import ip from "@/app/globalvariables";
+import { toast } from 'react-hot-toast';
 
 interface event {
   prjId: string;
   avaPorts: string[];
   contId: string;
-  defaultCont:boolean;
+  defaultCont: boolean;
 }
 
 interface Data {
   gotten: boolean;
   resEvents: event[];
-  message:string;
+  message: string;
 }
 
 const Instances = ({ user }: any) => {
@@ -23,32 +24,27 @@ const Instances = ({ user }: any) => {
 
   useEffect(() => {
     async function getData() {
-      const response = await fetch(
-        `${ip}/getinstances/${user.name}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${ip}/getinstances/${user.name}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       const result = await response.json();
       console.log(result);
-      
+
       setData(result);
     }
     getData();
   }, []);
   return (
     <div className="text-white">
-       
       {data1?.resEvents.length === 0 ? (
         <div className="">
-          <Cards username={user.name}/>
+          <Cards username={user.name} />
         </div>
       ) : (
         data1?.resEvents.map((ele) => (
           <div className="text-white">
-            no
             <Card className="flex gap-[50px] mb-[100px]">
               <div>
                 <CardTitle>Projectid</CardTitle>
@@ -65,29 +61,36 @@ const Instances = ({ user }: any) => {
                 </CardDescription>
               </div>
               <div className="flex items-center justify-center">
-                <Link
-                  href={`/terminal/${user.name}/${ele.prjId}`}
-                  className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
-                >
-                  connect
-                </Link>
+                {ele.defaultCont === true && (
+                  <Link
+                    href={`/terminal/${user.name}/${ele.prjId}`}
+                    className="bg-[#ededed] rounded-md text-black px-[15px] py-[10px] text-sm"
+                  >
+                    connect
+                  </Link>
+                )}
+                
               </div>
               <div className="flex items-center justify-center">
-                <button onClick={() => {
+                <button
+                  onClick={() => {
                     async function deleteCont() {
-                        const response = await fetch(
-                            `${ip}/delete/${user.name}/${ele.contId}`,
-                            {
-                                method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({ projectId: ele.prjId, })
-                            }
-                          );
+                      const response = await fetch(
+                        `${ip}/delete/${user.name}/${ele.contId}`,
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({ projectId: ele.prjId }),
+                        }
+                      );
                     }
+                    toast.success("deleted successfully")
                     deleteCont();
-                }} className="bg-[#e12129] rounded-md text-white px-[20px] py-[10px] text-sm">
+                  }}
+                  className="bg-[#e12129] rounded-md text-white px-[20px] py-[10px] text-sm"
+                >
                   delete
                 </button>
               </div>
