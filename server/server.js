@@ -215,7 +215,7 @@ app.post("/create/:userid/loadbalancer", (req, res) => {
   }
 });
 
-app.post("/delete/:userid/:loadbalancerid", (req, res) => {
+app.post("/delete/lb/:userid", (req, res) => {
   try {
     console.log(req.body);
     console.log(req.params.userid);
@@ -228,14 +228,14 @@ app.post("/delete/:userid/:loadbalancerid", (req, res) => {
 
     // finding the loadbalancer id json
     const findUser = database.LoadBalancing.find(
-      (ele) => ele.eventName == `${req.params.userid}-${req.body.projectId}`
+      (ele) => ele.eventName == `${req.body.projectId}`
     );
     if (findUser == undefined) {
       console.log("You dont have an Load Balancing, to Delete!");
       res.status(400);
       return res.send({
         deleted: false,
-        dockerContId: null ,
+        dockerContId: null,
         message: "You dont have an Load Balancing, to Delete!",
       });
     }
@@ -247,7 +247,7 @@ app.post("/delete/:userid/:loadbalancerid", (req, res) => {
       findUser.contIds
     );
     const index = database.LoadBalancing.map((ele) => ele.eventName).indexOf(
-      `${req.params.userid}-${req.body.projectId}`
+      `${req.body.projectId}`
     );
     database.LoadBalancing.splice(index, 1);
 
@@ -383,6 +383,43 @@ app.get("/getinstances/:userid", (req, res) => {
   }
 });
 
+app.get("/getloadbalancers/:userid", (req, res) => {
+  try {
+    // reading database json
+    const databaseString = fs.readFileSync("./db/database.json", {
+      encoding: "utf-8",
+    });
+    const database = databaseSchema.parse(JSON.parse(databaseString));
+    const eventNames = database.LoadBalancing;
+    const resEvents = [];
+    for (let i = 0; i < eventNames.length; i++) {
+      if (eventNames[i].eventName.includes(req.params.userid)) {
+        resEvents.push({
+          prjId: eventNames[i].eventName,
+          avaPorts: eventNames[i].webPort,
+          contId: eventNames[i].contIds,
+          defaultCont: false,
+        });
+      }
+    }
+    res.status(200);
+    console.log(`Returning User ${req.params.userid} Load Balancers!`);
+    res.send({
+      gotten: true,
+      resEvents: resEvents,
+      message: "Given the User Load Balancers!",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+    res.send({
+      gotten: false,
+      resEvents: null,
+      message: "Some Error Occured!!",
+    });
+  }
+});
+
 io.on("connection", function (socket) {
   console.log("Connection Done!");
   // reading db
@@ -442,7 +479,7 @@ io.on("connection", function (socket) {
       host: "10.10.10.154",
       username: "admin",
       password: "1234",
-      port: 2002,
+      port: eventNames[portNumberSSH].sshPort,
     });
 });
 

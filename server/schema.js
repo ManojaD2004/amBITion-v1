@@ -19,7 +19,7 @@ const databaseSchema = z.object({
     .array(),
   LoadBalancing: z.object({
     eventName: z.string(),
-    webPort: z.string(),
+    webPort: z.number(),
     contIds: z.string().array(),
   }).array(),
 });
